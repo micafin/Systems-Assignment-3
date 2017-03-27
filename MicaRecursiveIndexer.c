@@ -8,45 +8,48 @@
 #include <string.h>
 
 typedef struct _Node{
-  char * word=NULL;
-  int occurences=0;
-  struct _Node * next=NULL;
+  char * word;
+  int occurences;
+  struct _Node * next;
+  char * file;
 
 }Node;
 
 static Node file[26];
 
 int isFile(char * input){
-    struct stat inputCheck;
-    stat(input, &inputCheck);
-    return S_ISREG(inputCheck.st_mode);
+    struct stat path_stat;
+    stat(input, &path_stat);
+    return S_ISREG(path_stat.st_mode);
 }
 
 int isDirectory(char * input){
-    struct stat inputCheck;
-    if (stat(input, &inputCheck) != 0)
+    struct stat statbuf;
+    if (stat(input, &statbuf) != 0)
        return 0;
-    return S_ISDIR(inputCheck.st_mode);
+    return S_ISDIR(statbuf.st_mode);
 }
 
-void sort(Node * passed_in_node){
+void sort(char * token, char * fileName){
 
   //going to have to check how strcmp compares numbers
   
   //dynamic allocation of memory for prev and curr pointers to be used during traversal of the LL
 
+  token=tolower(token);
+  int index=token[0]-'a';
+  if(file[index]==NULL){
+      file[index]=createNode(token, fileName);
+      return;
+  }
   Node* prev = (Node*)malloc(sizeof(Node));
   prev = NULL;
   Node* curr = (Node*)malloc(sizeof(Node)); //curr = current node in the LL
   
   //curr intiialized to the head_of_list
-
-  curr = head_of_list;
-  if(head_of_list==NULL){
-        head_of_list=passed_in_node;
-        return;
-    }
-
+  
+  curr = file[index];
+ 
   //entering while loop to traverse the existing LL
   while(curr!=NULL){
     
@@ -88,8 +91,13 @@ void sort(Node * passed_in_node){
       } 
     }
     else if(comp==0){
+      if(curr->file==fileName){
+        curr->occurrences++;
+        return;
+      }
+      Node * newNode=createNode();
       if(curr_length>passed_in_node_length){
-        passed_in_node->next = curr;
+        newNode->next = curr;
         
         if(prev!=NULL){//checks to see where in the LL we are
           prev->next =passed_in_node;
@@ -124,18 +132,20 @@ void sort(Node * passed_in_node){
 }
 
 
-checkDirectory(char * input, int newFile, char * path){
+checkDirectory(int newFile, char * path){
     struct dirent * currEntry=NULL;
     DIR * directory=opendir(input);
+    char * temp;//NEED TO MALLOC
     do{
       currEntry=readdir(directory);
       if(currEntry!=NULL){
+        strcat(path,'/');
+        strcat(path,currEntry->d_name);
+        strcat(temp,currEntry->d_name);
         if(currEntry->d_type==DT_REG){
-          indexFile(input,newFile);
+          createToken(input,newFile,temp);
         }
         else if(currEntry->d_type==DT_DIR){
-          strcat(path,currEntry->d_name);
-          strcat(path,'/');
           checkDirectory(input,newFile);
         }
         else{
@@ -147,10 +157,10 @@ checkDirectory(char * input, int newFile, char * path){
     closedir(directory);
 }
 
-void createToken(char * input, int newFile){
+void createToken(char * input, int newFile, char * fileName){
   char *token=(char*)malloc(sizeof(char));
   char storeChar[1]='\0';
-  while(read(newFile,storeChar,1)!=0){
+  while(read(input,storeChar,1)!=0){
     if(isdigit(storeChar[0])){
       if(token==NULL){
         continue;
@@ -158,26 +168,31 @@ void createToken(char * input, int newFile){
     }
     
     if(!isalnum(storeChar[0])){
-      indexFile(token,newFile);
+      if(token==NULL){
+        continue;
+      }
+      sort(token,newFile,fileName);
       token=NULL;
     }
 
     memcpy(token,storeChar,1);  
     char * temp=(char*)realloc(token,sizeof(char));
     token=temp;         
-    
   }
-
 }
 
-void indexFile(char * token,int newFile){
+Node * createNode(char * token, char * fileName){
 
     //find first letter of file name and go to that index
     //create new node then sort
+    //add filename to array
     Node * newNode=malloc(sizeof(Node));
+    newNode->word=malloc(strlen(token));
     newNode->word=tolower(token);
     newNode->occurrences++;
-    sort(newNode);
+    newNode->file=malloc(strlen(fileName));
+    newNode->file=tolower(fileName);
+    return newNode;
 }
 
 
@@ -191,12 +206,12 @@ int main(int argc, char** argv){
 
   if(isFile(argv[2])){
     //open file 
-    indexFile(argv[2], newFile);
+    createToken(argv[2], newFile);
   }
   else if(isDirectory(argv[2])){
     char path[260];
-    strcat(path,"./");
-    checkDirectory(argv[2],newFile,path);
+    strcat(path,".");
+    checkDirectory(newFile, path);
 
   }
   else{
