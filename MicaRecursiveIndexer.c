@@ -7,6 +7,7 @@
 #include <dirent.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 
 typedef struct _File{
     int occurrences;
@@ -16,7 +17,7 @@ typedef struct _File{
 
 typedef struct _Node{
   char * word;
-  struct _File * fileNext;
+  File * fileNext;
   struct _Node * next;
 
 }Node;
@@ -37,31 +38,37 @@ int isDirectory(char * input){
 }
 
 File * createFile(char * fileName){
-    File * newNode=malloc(sizeof(Node));
-    newNode->file=malloc(strlen(fileName));
+    File * newNode=(File*)malloc(sizeof(File));
+    newNode->file=(char*)malloc(strlen(fileName));
     newNode->file=fileName;
-    newNode->occurences=1;
+    newNode->occurrences=1;
     return newNode;
 }
 
 Node * createNode(char * token){
-    Node * newNode=malloc(sizeof(Node));
-    newNode->word=malloc(strlen(token));
+    Node * newNode=(Node*)malloc(sizeof(Node));
+    newNode->word=(char*)malloc(strlen(token));
     newNode->word=token;
     return newNode;
 }
 
 void sortFile(char * fileName, int index){
-  
+  printf("\n",file[index]);
+  if(file[index]->fileNext==NULL){
+    
+      file[index]->fileNext=createFile(fileName);
+      return;
+  }
   //dynamic allocation of memory for prev and curr pointers to be used during traversal of the LL
   File* prev = (File*)malloc(sizeof(File));
   prev = NULL;
-  File* curr = (File*)malloc(sizeof(File)); //curr = current node in the LL
-  
+  File* curr = (File*)malloc(sizeof(File));
   curr = file[index]->fileNext;
+   //curr = current node in the LL
  
   //entering while loop to traverse the existing LL
   while(curr!=NULL){  
+
     int comp=strcmp(fileName,curr->file);
     
     /*following lines of code check to see in what order are the words given in: 
@@ -74,7 +81,6 @@ void sortFile(char * fileName, int index){
         3. if comp <0, then that means that passed_in_node->word is supposed to come BEFORE curr->word
 
     */
-    
     if(comp>0){ 
       prev=curr;
       curr=curr->next;
@@ -203,13 +209,13 @@ void sortWord(char * token, char * fileName, int index){
 void createToken(char * input, int newFile, char * fileName){
   char *token=(char*)malloc(sizeof(char));
   char storeChar[1]="";
-  while(read(input,storeChar,1)!=0){
+  int fd=open(input, O_RDONLY);
+  while(read(fd,storeChar,1)!=0){
     if(isdigit(storeChar[0])){
       if(token==NULL){
         continue;
       }
     }
-    
     if(!isalnum(storeChar[0])){
       if(token==NULL){
         continue;
@@ -219,7 +225,7 @@ void createToken(char * input, int newFile, char * fileName){
       sortFile(fileName,index);
       token=NULL;
     }
-    storeChar=tolower(storeChar);
+    storeChar[0]=tolower(storeChar[0]);
     memcpy(token,storeChar,1);  
     char * temp=(char*)realloc(token,sizeof(char));
     token=temp;         
@@ -253,8 +259,9 @@ void checkDirectory(int newFile, char * path){
 
 
 int main(int argc, char** argv){
-
-  int newFile=open(argv[1], O_RDWR | O_CREAT);
+ 
+  //int newFile=open(argv[1], O_RDWR | O_CREAT);
+  int newFile=0;
   if(newFile==-1){
     //file was not created
   }
