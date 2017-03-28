@@ -167,10 +167,8 @@ void sortWord(char * token, char * fileName, int index){
 
 int filesize(const char *filename) {
     struct stat st;
-    
     if (stat(filename, &st) == 0)
         return (int)(st.st_size);
-    
     return -1;
 }
 
@@ -186,6 +184,7 @@ void createToken(char * input, int newFile, char * fileName){
     char curr[1]= "";
     int fd=open(input, O_RDONLY);
     int iterator = 0;
+   // printf("hello\n");
     while(read(fd,curr,1)!=0){
         if(isdigit(curr[0])&&iterator == 0){
             continue;
@@ -229,11 +228,12 @@ void createToken(char * input, int newFile, char * fileName){
 
 void checkDirectory(int newFile, char * path){
     //strcat(path,"/");
-    //printf("%s\n",path);
+   
     DIR * directory=opendir(path);
     struct dirent * currEntry;
     char * temp=malloc(sizeof(char)*256);//NEED TO MALLOC
     while((currEntry=readdir(directory))!=NULL){
+
         //if(currEntry!=NULL){
         // printf("%s\n",currEntry->d_name);
         if(strcmp(currEntry->d_name,".DS_Store")==0|| strcmp(currEntry->d_name,".")==0 || strcmp(currEntry->d_name,"..")==0){
@@ -253,13 +253,16 @@ void checkDirectory(int newFile, char * path){
             printf("%s\n",currEntry->d_name);
             checkDirectory(newFile, path);
             return;
+
         }
         else{
             fprintf(stderr,"ERROR: Input is not a file or a directoy.\n");
             exit(1);
         }
+
         closedir(directory);
     }
+
 }
 
 
