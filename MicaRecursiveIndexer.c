@@ -53,9 +53,8 @@ Node * createNode(char * token){
 }
 
 void sortFile(char * fileName, int index){
-  printf("\n",file[index]);
+
   if(file[index]->fileNext==NULL){
-    
       file[index]->fileNext=createFile(fileName);
       return;
   }
@@ -133,20 +132,6 @@ void sortWord(char * token, char * fileName, int index){
  
   //entering while loop to traverse the existing LL
   while(curr!=NULL){
-    
-    // int comp_length = 0; 
-    
-    // //following code checks to see which word length is smaller between passed_in_node and current node in LL in order to set as "size" in strncmp in order to avoid going out of bounds 
-    // int curr_length = strlen(curr->word);
-    // int newNodeLength = strlen(token);
-  
-    // if(curr_length<newNodeLength){
-    //   comp_length = newNodeLength;
-    // }
-
-    // else{
-    //   comp_length = curr_length;
-    // }
                
     int comp=strcmp(token,curr->word);
     
@@ -172,22 +157,6 @@ void sortWord(char * token, char * fileName, int index){
       } 
     }
     else if(comp==0){
-      
-      // if(curr_length>newNodeLength){
-      //   newNode->next = curr;
-        
-      //   if(prev!=NULL){//checks to see where in the LL we are
-      //     prev->next =newNode;
-      //   }
-      //   else{//at head of list
-      //     file[index]=newNode;
-      //   }
-        
-      //   return;
-      // }
-      // else{
-      // newNode->next= curr-> next;
-      // curr->next = newNode;
       return;
       // }
     }else{
@@ -227,7 +196,7 @@ void createToken(char * input, int newFile, char * fileName){
     }
     storeChar[0]=tolower(storeChar[0]);
     memcpy(token,storeChar,1);  
-    char * temp=(char*)realloc(token,sizeof(char));
+    char * temp=(char*)realloc(token,sizeof(char)*strlen(token)+sizeof(char));
     token=temp;         
   }
 }
