@@ -53,7 +53,7 @@ Node * createNode(char * token){
 }
 
 void sortFile(char * fileName, int index){
-    
+    //printf("entered\n");
     if(file[index]->fileNext==NULL){
         file[index]->fileNext=createFile(fileName);
         return;
@@ -101,6 +101,7 @@ void sortFile(char * fileName, int index){
 }
 
 void sortWord(char * token, char * fileName, int index){
+    
     if(file[index]==NULL){
         file[index]=createNode(token);
         return;
@@ -146,35 +147,47 @@ void sortWord(char * token, char * fileName, int index){
 }
 
 void createToken(char * input, int newFile, char * fileName){
-    char *token=(char*)malloc(sizeof(char));
-    char storeChar[1]="";
+    //char *token=(char*)malloc(sizeof(char));
+    char * token = (char*)malloc(sizeof(char)*256);
+    token[0] = '\0';
+    char curr[1]= "";
     int fd=open(input, O_RDONLY);
-    while(read(fd,storeChar,1)!=0){
-        if(isdigit(storeChar[0])){
-            if(token==NULL){
-                continue;
-            }
+    int iterator = 0;
+    while(read(fd,curr,1)!=0){
+        if(isdigit(curr[0])&&iterator == 0){
+            continue;
         }
-        if(!isalnum(storeChar[0])){
-            if(token==NULL){
+        if(!isalnum(curr[0])){
+            if(iterator == 0){
                 continue;
             }
             int index=token[0]-'a';
+            printf("%s\n",token);
             sortWord(token,fileName,index);
             sortFile(fileName,index);
-            token=NULL;
+            token = memset(token, 0, strlen(token));
+            iterator = 0;
+        }else{
+            token[iterator] = curr[0];
+            iterator++;
+            //printf("%s\n",token);
         }
-        storeChar[0]=tolower(storeChar[0]);
-        memcpy(token,storeChar,1);
-        char * temp=(char*)realloc(token,sizeof(char)*strlen(token)+sizeof(char));
-        token=temp;
+    }
+    if(iterator!=0){
+        int index=token[0]-'a';
+        printf("%s\n",token);
+        sortWord(token,fileName,index);
+        sortFile(fileName,index);
+        token = memset(token, 0, strlen(token));
+        iterator = 0;
+
     }
 }
 
 void checkDirectory(int newFile, char * path){
     struct dirent * currEntry=NULL;
     DIR * directory=opendir(path);
-    char * temp;//NEED TO MALLOC
+    char * temp = NULL;//NEED TO MALLOC
     do{
         currEntry=readdir(directory);
         if(currEntry!=NULL){
