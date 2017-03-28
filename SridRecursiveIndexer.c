@@ -113,6 +113,63 @@ void sortWord(char * token, char * fileName, int index){
     //going to have to check how strcmp compares numbers
     
     //dynamic allocation of memory for prev and curr pointers to be used during traversal of the LL
+
+    newNode->occurences=1;
+    return newNode;
+}
+
+Node * createNode(char * token){
+    Node * newNode=malloc(sizeof(Node));
+    newNode->word=malloc(strlen(token));
+    newNode->word=token;
+    return newNode;
+}
+
+void sortFile(char * fileName, int index){
+    
+    //dynamic allocation of memory for prev and curr pointers to be used during traversal of the LL
+    File* prev = (File*)malloc(sizeof(File));
+    prev = NULL;
+    File* curr = (File*)malloc(sizeof(File)); //curr = current node in the LL
+    
+    curr = file[index]->fileNext;
+    
+    //entering while loop to traverse the existing LL
+    while(curr!=NULL){
+        int comp=strcmp(fileName,curr->file);
+        if(comp>0){
+            prev=curr;
+            curr=curr->next;
+            
+            if(curr == NULL){ // checks to see if end of the LL is reached
+                File * newNode=createFile(fileName);
+                newNode->next = curr;
+                prev->next = newNode;
+                return;
+            }
+        }
+        else if(comp==0){
+            curr->occurrences++;
+            return;
+        }else{
+            
+            if(prev==NULL){// if prev ==NULL, then we are at head of the list
+                File * newNode=createFile(fileName);
+                newNode->next=curr;
+                file[index]->fileNext=newNode;
+                return;
+            }
+            else{
+                File * newNode=createFile(fileName);
+                newNode->next=curr;
+                prev->next=newNode;
+                return;
+            }
+        }
+    }
+}
+
+void sortWord(char * token, char * fileName, int index){
     
     if(file[index]==NULL){
         file[index]=createNode(token);
@@ -121,7 +178,7 @@ void sortWord(char * token, char * fileName, int index){
     Node* prev = (Node*)malloc(sizeof(Node));
     prev = NULL;
     Node* curr = (Node*)malloc(sizeof(Node)); //curr = current node in the LL
-    
+
     //curr intiialized to the head_of_list
     
     curr = file[index];
@@ -140,6 +197,11 @@ void sortWord(char * token, char * fileName, int index){
          3. if comp <0, then that means that passed_in_node->word is supposed to come BEFORE curr->word
          
          */
+    curr = file[index];
+    
+    while(curr!=NULL){
+
+        int comp=strcmp(token,curr->word);
         Node * newNode=createNode(token);
         if(comp>0){
             prev=curr;
@@ -231,7 +293,6 @@ int main(int argc, char** argv){
     //use errno
     
     if(isFile(argv[2])){
-        //open file
         createToken(argv[2], newFile, argv[2]);
     }
     else if(isDirectory(argv[2])){
