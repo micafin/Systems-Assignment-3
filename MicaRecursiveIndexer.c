@@ -167,10 +167,8 @@ void sortWord(char * token, char * fileName, int index){
 
 int filesize(const char *filename) {
     struct stat st;
-    
     if (stat(filename, &st) == 0)
         return (int)(st.st_size);
-    
     return -1;
 }
 
@@ -186,6 +184,7 @@ void createToken(char * input, int newFile, char * fileName){
     char curr[1]= "";
     int fd=open(input, O_RDONLY);
     int iterator = 0;
+   // printf("hello\n");
     while(read(fd,curr,1)!=0){
         if(isdigit(curr[0])&&iterator == 0){
             continue;
@@ -229,36 +228,34 @@ void createToken(char * input, int newFile, char * fileName){
 
 void checkDirectory(int newFile, char * path){
     //strcat(path,"/");
-    //printf("%s\n",path);
+   
     DIR * directory=opendir(path);
     struct dirent * currEntry;
     char * temp=malloc(sizeof(char)*256);//NEED TO MALLOC
     while((currEntry=readdir(directory))!=NULL){
+      //printf("hello\n");
       //if(currEntry!=NULL){
-     // printf("%s\n",currEntry->d_name);
-       if(currEntry->d_type==DT_REG){
-          if(strcmp(currEntry->d_name,".DS_Store")==0){
+      printf("%s\n",currEntry->d_name);
+       if(strcmp(currEntry->d_name,".")==0||strcmp(currEntry->d_name,"..")==0||strcmp(currEntry->d_name,".DS_Store")==0){
             continue;
           }
-          printf("hello\n");
-          printf("%s\n",currEntry->d_name);
+       if(currEntry->d_type==DT_REG){
+          //printf("file: %s\n",currEntry->d_name);
           strcat(temp,currEntry->d_name);
-
           createToken(path,newFile,temp);
         }
        else if(currEntry->d_type==DT_DIR){
           strcat(path,"/");
           strcat(path,currEntry->d_name);
-          printf("%s\n",currEntry->d_name);
+          //printf("directory: %s\n",currEntry->d_name);
           checkDirectory(newFile, path);
-          return;
         }
         else{
           fprintf(stderr,"ERROR: Input is not a file or a directoy.\n");
           exit(1);
         }
-         closedir(directory);
       }
+      closedir(directory);
 }
 
 
@@ -279,8 +276,6 @@ int main(int argc, char** argv){
     char path[260];
     strcat(path,"./");
     strcat(path,argv[2]);
-    //strcat(path,"/");
-    //printf("path %s\n",path);
     checkDirectory(newFile, path);
 
   }
