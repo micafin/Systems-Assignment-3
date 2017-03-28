@@ -16,10 +16,10 @@ typedef struct _File{
 }File;
 
 typedef struct _Node{
-  char * word;
-  File * fileNext;
-  struct _Node * next;
-
+    char * word;
+    File * fileNext;
+    struct _Node * next;
+    
 }Node;
 
 static Node * file[26];
@@ -33,7 +33,7 @@ int isFile(char * input){
 int isDirectory(char * input){
     struct stat statbuf;
     if (stat(input, &statbuf) != 0)
-       return 0;
+        return 0;
     return S_ISDIR(statbuf.st_mode);
 }
 
@@ -55,114 +55,114 @@ Node * createNode(char * token){
 }
 
 void sortFile(char * fileName, int index){
-
-  if(file[index]->fileNext==NULL){
-      file[index]->fileNext=createFile(fileName);
-      return;
-  }
-  //dynamic allocation of memory for prev and curr pointers to be used during traversal of the LL
-  File* prev = (File*)malloc(sizeof(File));
-  prev = NULL;
-  File* curr = (File*)malloc(sizeof(File));
-  curr = file[index]->fileNext;
-   //curr = current node in the LL
- 
-  //entering while loop to traverse the existing LL
-  while(curr!=NULL){  
-
-    int comp=strcmp(fileName,curr->file);
     
-    /*following lines of code check to see in what order are the words given in: 
-        1. if comp>0, then that means that the passed_in_node->word comes AFTER the curr->word 
-            -If this is the case, then the traversal of the LL continues
-
-        2. if comp==0, then that means that both of the words are equal UP TO comp_length
-            -further checks are made to see order of the words based on word length;
-
-        3. if comp <0, then that means that passed_in_node->word is supposed to come BEFORE curr->word
-
-    */
-    if(comp>0){ 
-      prev=curr;
-      curr=curr->next;
-      
-      if(curr == NULL){ // checks to see if end of the LL is reached
-        File * newNode=createFile(fileName);
-        newNode->next = curr;
-        prev->next = newNode;
+    if(file[index]->fileNext==NULL){
+        file[index]->fileNext=createFile(fileName);
         return;
-      } 
     }
-    else if(comp==0){
-      curr->occurrences++;
-      return;
-    }else{
+    //dynamic allocation of memory for prev and curr pointers to be used during traversal of the LL
+    File* prev = (File*)malloc(sizeof(File));
+    prev = NULL;
+    File* curr = (File*)malloc(sizeof(File));
+    curr = file[index]->fileNext;
+    //curr = current node in the LL
+    
+    //entering while loop to traverse the existing LL
+    while(curr!=NULL){
+        
+        int comp=strcmp(fileName,curr->file);
+        
+        /*following lines of code check to see in what order are the words given in:
+         1. if comp>0, then that means that the passed_in_node->word comes AFTER the curr->word
+         -If this is the case, then the traversal of the LL continues
          
-      if(prev==NULL){// if prev ==NULL, then we are at head of the list
-        File * newNode=createFile(fileName);
-        newNode->next=curr;
-        file[index]->fileNext=newNode;
-        return;
-      }
-      else{
-        File * newNode=createFile(fileName);
-        newNode->next=curr;
-        prev->next=newNode; 
-        return;
-      } 
+         2. if comp==0, then that means that both of the words are equal UP TO comp_length
+         -further checks are made to see order of the words based on word length;
+         
+         3. if comp <0, then that means that passed_in_node->word is supposed to come BEFORE curr->word
+         
+         */
+        if(comp>0){
+            prev=curr;
+            curr=curr->next;
+            
+            if(curr == NULL){ // checks to see if end of the LL is reached
+                File * newNode=createFile(fileName);
+                newNode->next = curr;
+                prev->next = newNode;
+                return;
+            }
+        }
+        else if(comp==0){
+            curr->occurrences++;
+            return;
+        }else{
+            
+            if(prev==NULL){// if prev ==NULL, then we are at head of the list
+                File * newNode=createFile(fileName);
+                newNode->next=curr;
+                file[index]->fileNext=newNode;
+                return;
+            }
+            else{
+                File * newNode=createFile(fileName);
+                newNode->next=curr;
+                prev->next=newNode;
+                return;
+            }
+        }
     }
-  }
 }
 
 void sortWord(char * token, char * fileName, int index){
-
-  //going to have to check how strcmp compares numbers
-  
-  //dynamic allocation of memory for prev and curr pointers to be used during traversal of the LL
-
-  if(file[index]==NULL){
-      file[index]=createNode(token);
-      return;
-  }
-  Node* prev = (Node*)malloc(sizeof(Node));
-  prev = NULL;
-  Node* curr = (Node*)malloc(sizeof(Node)); //curr = current node in the LL
-  
-  //curr intiialized to the head_of_list
-  
-  curr = file[index];
- 
-  //entering while loop to traverse the existing LL
-  while(curr!=NULL){  
-    int comp=strcmp(token,curr->word);
-    Node * newNode=createNode(token);
-    if(comp>0){ 
-      prev=curr;
-      curr=curr->next;
-      
-      if(curr == NULL){ // checks to see if end of the LL is reached
-        newNode->next = curr;
-        prev->next = newNode;
+    
+    //going to have to check how strcmp compares numbers
+    
+    //dynamic allocation of memory for prev and curr pointers to be used during traversal of the LL
+    
+    if(file[index]==NULL){
+        file[index]=createNode(token);
         return;
-      } 
     }
-    else if(comp==0){
-      return;
-      // }
-    }else{
-         
-      if(prev==NULL){// if prev ==NULL, then we are at head of the list
-        newNode->next=curr;
-        file[index]=newNode;
-        return;
-      }
-      else{
-        newNode->next=curr;
-        prev->next=newNode; 
-        return;
-      } 
+    Node* prev = (Node*)malloc(sizeof(Node));
+    prev = NULL;
+    Node* curr = (Node*)malloc(sizeof(Node)); //curr = current node in the LL
+    
+    //curr intiialized to the head_of_list
+    
+    curr = file[index];
+    
+    //entering while loop to traverse the existing LL
+    while(curr!=NULL){
+        int comp=strcmp(token,curr->word);
+        Node * newNode=createNode(token);
+        if(comp>0){
+            prev=curr;
+            curr=curr->next;
+            
+            if(curr == NULL){ // checks to see if end of the LL is reached
+                newNode->next = curr;
+                prev->next = newNode;
+                return;
+            }
+        }
+        else if(comp==0){
+            return;
+            // }
+        }else{
+            
+            if(prev==NULL){// if prev ==NULL, then we are at head of the list
+                newNode->next=curr;
+                file[index]=newNode;
+                return;
+            }
+            else{
+                newNode->next=curr;
+                prev->next=newNode;
+                return;
+            }
+        }
     }
-  }
 }
 
 int filesize(const char *filename) {
@@ -195,7 +195,7 @@ void createToken(char * input, int newFile, char * fileName){
                 continue;
             }
             int index=token[0]-'a';
-           printf("%s\n",token);
+            printf("%s\n",token);
             //printf("Hiya\n");
             sortWord(token,fileName,index);
             sortFile(fileName,index);
@@ -214,7 +214,7 @@ void createToken(char * input, int newFile, char * fileName){
         sortFile(fileName,index);
         token = memset(token, 0, strlen(token));
         iterator = 0;
-
+        
     }
     // int i;
     // Node * tmp;
@@ -234,59 +234,60 @@ void checkDirectory(int newFile, char * path){
     struct dirent * currEntry;
     char * temp=malloc(sizeof(char)*256);//NEED TO MALLOC
     while((currEntry=readdir(directory))!=NULL){
-      //if(currEntry!=NULL){
-     // printf("%s\n",currEntry->d_name);
-       if(currEntry->d_type==DT_REG){
-          if(strcmp(currEntry->d_name,".DS_Store")==0){
+        //if(currEntry!=NULL){
+        // printf("%s\n",currEntry->d_name);
+        if(strcmp(currEntry->d_name,".DS_Store")==0|| strcmp(currEntry->d_name,".")==0 || strcmp(currEntry->d_name,"..")==0){
             continue;
-          }
-          printf("hello\n");
-          printf("%s\n",currEntry->d_name);
-          strcat(temp,currEntry->d_name);
-
-          createToken(path,newFile,temp);
         }
-       else if(currEntry->d_type==DT_DIR){
-          strcat(path,"/");
-          strcat(path,currEntry->d_name);
-          printf("%s\n",currEntry->d_name);
-          checkDirectory(newFile, path);
-          return;
+
+        if(currEntry->d_type==DT_REG){
+            printf("hello\n");
+            printf("%s\n",currEntry->d_name);
+            strcat(temp,currEntry->d_name);
+            
+            createToken(path,newFile,temp);
+        }
+        else if(currEntry->d_type==DT_DIR){
+            strcat(path,"/");
+            strcat(path,currEntry->d_name);
+            printf("%s\n",currEntry->d_name);
+            checkDirectory(newFile, path);
+            return;
         }
         else{
-          fprintf(stderr,"ERROR: Input is not a file or a directoy.\n");
-          exit(1);
+            fprintf(stderr,"ERROR: Input is not a file or a directoy.\n");
+            exit(1);
         }
-         closedir(directory);
-      }
+        closedir(directory);
+    }
 }
 
 
 int main(int argc, char** argv){
- 
-  //int newFile=open(argv[1], O_RDWR | O_CREAT);
-  int newFile=0;
-  if(newFile==-1){
-    //file was not created
-  }
-  //use errno
-
-  if(isFile(argv[2])){
-    //open file 
-    createToken(argv[2], newFile, argv[2]);
-  }
-  else if(isDirectory(argv[2])){
-    char path[260];
-    strcat(path,"./");
-    strcat(path,argv[2]);
-    //strcat(path,"/");
-    //printf("path %s\n",path);
-    checkDirectory(newFile, path);
-
-  }
-  else{
-    fprintf(stderr,"ERROR: Input is not a file or directory.\n");
-    return -1;
-  }
-  return 0;
+    
+    //int newFile=open(argv[1], O_RDWR | O_CREAT);
+    int newFile=0;
+    if(newFile==-1){
+        //file was not created
+    }
+    //use errno
+    
+    if(isFile(argv[2])){
+        //open file 
+        createToken(argv[2], newFile, argv[2]);
+    }
+    else if(isDirectory(argv[2])){
+        char path[260];
+        strcat(path,"./");
+        strcat(path,argv[2]);
+        //strcat(path,"/");
+        //printf("path %s\n",path);
+        checkDirectory(newFile, path);
+        
+    }
+    else{
+        fprintf(stderr,"ERROR: Input is not a file or directory.\n");
+        return -1;
+    }
+    return 0;
 }

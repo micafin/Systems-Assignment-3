@@ -41,6 +41,8 @@ File * createFile(char * fileName){
     File * newNode=(File*)malloc(sizeof(File));
     newNode->file=(char*)malloc(strlen(fileName));
     newNode->file=fileName;
+    newNode->next = (File*)malloc(sizeof(File));
+    newNode-> next = NULL;
     newNode->occurrences=1;
     return newNode;
 }
@@ -49,9 +51,9 @@ Node * createNode(char * token){
     Node * newNode=(Node*)malloc(sizeof(Node));
     newNode->word=(char*)malloc(strlen(token));
     newNode->word=token;
-    newNode->fileNext = (File*)malloc(sizeof(File*));
+    newNode->fileNext = (File*)malloc(sizeof(File));
     newNode->fileNext = NULL;
-    newNode->next = (Node*) malloc(sizeof(Node*));
+    newNode->next = (Node*) malloc(sizeof(Node));
     return newNode;
 }
 
@@ -104,7 +106,7 @@ void sortFile(char * fileName, int index){
 }
 
 void sortWord(char * token, char * fileName, int index){
-    printf("entered burh \n");
+    //printf("entered burh \n");
     if(!file[index]){
         file[index]=createNode(token);
         return;
@@ -160,12 +162,12 @@ int filesize(const char *filename) {
 
 void createToken(char * input, int newFile, char * fileName){
     //char *token=(char*)malloc(sizeof(char));
-    int filesz = filesize(fileName);
-    if(filesz == -1){
-        printf("This is not a file.  Sorry\n");
-        return;
-    }
+    FILE* file = fopen(fileName, "r");;
+    fseek(file,0,SEEK_END);
+    long filesz = ftell(file);
+    fseek(file,0,SEEK_SET);
     char * token = (char*)malloc(sizeof(char)*filesz);
+    
     token[0] = '\0';
     char curr[1]= "";
     int fd=open(input, O_RDONLY);
@@ -209,29 +211,40 @@ void createToken(char * input, int newFile, char * fileName){
 }
 
 void checkDirectory(int newFile, char * path){
-    struct dirent * currEntry=NULL;
+    //strcat(path,"/");
+    //printf("%s\n",path);
     DIR * directory=opendir(path);
-    char * temp = NULL;//NEED TO MALLOC
-    do{
-        currEntry=readdir(directory);
-        if(currEntry!=NULL){
+    struct dirent * currEntry;
+    char * temp=malloc(sizeof(char)*256);//NEED TO MALLOC
+    while((currEntry=readdir(directory))!=NULL){
+        //if(currEntry!=NULL){
+        // printf("%s\n",currEntry->d_name);
+        if(strcmp(currEntry->d_name,".DS_Store")==0|| strcmp(currEntry->d_name,".")==0 || strcmp(currEntry->d_name,"..")==0){
+            continue;
+        }
+        
+        if(currEntry->d_type==DT_REG){
+            printf("hello\n");
+            printf("%s\n",currEntry->d_name);
+            strcat(temp,currEntry->d_name);
+            
+            createToken(path,newFile,temp);
+        }
+        else if(currEntry->d_type==DT_DIR){
             strcat(path,"/");
             strcat(path,currEntry->d_name);
-            strcat(temp,currEntry->d_name);
-            if(currEntry->d_type==DT_REG){
-                createToken(path,newFile,temp);
-            }
-            else if(currEntry->d_type==DT_DIR){
-                checkDirectory(newFile, path);
-            }
-            else{
-                fprintf(stderr,"ERROR: Input is not a file or a directoy.");
-                exit(1);
-            }
+            printf("%s\n",currEntry->d_name);
+            checkDirectory(newFile, path);
+            return;
         }
-    }while(currEntry!=NULL);
-    closedir(directory);
+        else{
+            fprintf(stderr,"ERROR: Input is not a file or a directoy.\n");
+            exit(1);
+        }
+        closedir(directory);
+    }
 }
+
 
 
 int main(int argc, char** argv){
