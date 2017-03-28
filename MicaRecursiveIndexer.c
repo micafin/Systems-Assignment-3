@@ -175,54 +175,98 @@ void sortWord(char * token, char * fileName, int index){
   }
 }
 
+int filesize(const char *filename) {
+    struct stat st;
+    
+    if (stat(filename, &st) == 0)
+        return (int)(st.st_size);
+    
+    return -1;
+}
+
 void createToken(char * input, int newFile, char * fileName){
-  char *token=(char*)malloc(sizeof(char));
-  char storeChar[1]="";
-  int fd=open(input, O_RDONLY);
-  while(read(fd,storeChar,1)!=0){
-    if(isdigit(storeChar[0])){
-      if(token==NULL){
-        continue;
-      }
+    //char *token=(char*)malloc(sizeof(char));
+    int filesz = filesize(fileName);
+    if(filesz == -1){
+        printf("This is not a file.  Sorry\n");
+        return;
     }
-    if(!isalnum(storeChar[0])){
-      if(token==NULL){
-        continue;
-      }
-      int index=token[0]-'a';
-      sortWord(token,fileName,index);
-      sortFile(fileName,index);
-      token=NULL;
+    char * token = (char*)malloc(sizeof(char)*filesz);
+    token[0] = '\0';
+    char curr[1]= "";
+    int fd=open(input, O_RDONLY);
+    int iterator = 0;
+    while(read(fd,curr,1)!=0){
+        if(isdigit(curr[0])&&iterator == 0){
+            continue;
+        }
+        if(!isalnum(curr[0])){
+            if(iterator == 0){
+                continue;
+            }
+            int index=token[0]-'a';
+           printf("%s\n",token);
+            //printf("Hiya\n");
+            sortWord(token,fileName,index);
+            sortFile(fileName,index);
+            token = memset(token, 0, strlen(token));
+            iterator = 0;
+        }else{
+            token[iterator] = curr[0];
+            iterator++;
+            //printf("%s\n",token);
+        }
     }
-    storeChar[0]=tolower(storeChar[0]);
-    memcpy(token,storeChar,1);  
-    char * temp=(char*)realloc(token,sizeof(char)*strlen(token)+sizeof(char));
-    token=temp;         
-  }
+    if(iterator!=0){
+        int index=token[0]-'a';
+        printf("%s\n",token);
+        sortWord(token,fileName,index);
+        sortFile(fileName,index);
+        token = memset(token, 0, strlen(token));
+        iterator = 0;
+
+    }
+    // int i;
+    // Node * tmp;
+    // for(i=0;i<26;i++){
+    //   tmp=file[i];
+    //   while(tmp!=NULL){
+    //     printf("%s\n",tmp->word);
+    //     tmp=tmp->next;
+    //   }
+    // }
 }
 
 void checkDirectory(int newFile, char * path){
-    struct dirent * currEntry=NULL;
+
     DIR * directory=opendir(path);
-    char * temp;//NEED TO MALLOC
-    do{
-      currEntry=readdir(directory);
-      if(currEntry!=NULL){
-        strcat(path,"/");
-        strcat(path,currEntry->d_name);
-        strcat(temp,currEntry->d_name);
-        if(currEntry->d_type==DT_REG){
+    struct dirent * currEntry;
+    char * temp=malloc(sizeof(char)*256);//NEED TO MALLOC
+    while((currEntry=readdir(directory))!=NULL){
+      //if(currEntry!=NULL){
+        //
+       if(currEntry->d_type==DT_REG){
+          if(strcmp(currEntry->d_name,".DS_Store")==0){
+            continue;
+          }
+          
+          printf("%s\n",currEntry->d_name);
+          strcat(temp,currEntry->d_name);
+
           createToken(path,newFile,temp);
         }
-        else if(currEntry->d_type==DT_DIR){
+       else if(currEntry->d_type==DT_DIR){
+        //printf("hello\n");
+          strcat(path,"/");
+          strcat(path,currEntry->d_name);
           checkDirectory(newFile, path);
+          return;
         }
         else{
-          fprintf(stderr,"ERROR: Input is not a file or a directoy.");
+          fprintf(stderr,"ERROR: Input is not a file or a directoy.\n");
           exit(1);
         }
       }
-    }while(currEntry!=NULL);
     closedir(directory);
 }
 
@@ -242,7 +286,9 @@ int main(int argc, char** argv){
   }
   else if(isDirectory(argv[2])){
     char path[260];
-    strcat(path,".");
+    //strcat(path,".");
+    strcat(path,argv[2]);
+    //printf("path %s\n",path);
     checkDirectory(newFile, path);
 
   }
