@@ -42,6 +42,8 @@ File * createFile(char * fileName){
     newNode->file=(char*)malloc(strlen(fileName));
     newNode->file=fileName;
     newNode->occurrences=1;
+    newNode->next=malloc(sizeof(File*));
+    newNode->next=NULL;
     return newNode;
 }
 
@@ -131,20 +133,8 @@ void sortWord(char * token, char * fileName, int index){
   curr = file[index];
  
   //entering while loop to traverse the existing LL
-  while(curr!=NULL){
-               
+  while(curr!=NULL){  
     int comp=strcmp(token,curr->word);
-    
-    /*following lines of code check to see in what order are the words given in: 
-        1. if comp>0, then that means that the passed_in_node->word comes AFTER the curr->word 
-            -If this is the case, then the traversal of the LL continues
-
-        2. if comp==0, then that means that both of the words are equal UP TO comp_length
-            -further checks are made to see order of the words based on word length;
-
-        3. if comp <0, then that means that passed_in_node->word is supposed to come BEFORE curr->word
-
-    */
     Node * newNode=createNode(token);
     if(comp>0){ 
       prev=curr;
@@ -238,27 +228,28 @@ void createToken(char * input, int newFile, char * fileName){
 }
 
 void checkDirectory(int newFile, char * path){
-
+    //strcat(path,"/");
+    //printf("%s\n",path);
     DIR * directory=opendir(path);
     struct dirent * currEntry;
     char * temp=malloc(sizeof(char)*256);//NEED TO MALLOC
     while((currEntry=readdir(directory))!=NULL){
       //if(currEntry!=NULL){
-        //
+     // printf("%s\n",currEntry->d_name);
        if(currEntry->d_type==DT_REG){
           if(strcmp(currEntry->d_name,".DS_Store")==0){
             continue;
           }
-          
+          printf("hello\n");
           printf("%s\n",currEntry->d_name);
           strcat(temp,currEntry->d_name);
 
           createToken(path,newFile,temp);
         }
        else if(currEntry->d_type==DT_DIR){
-        //printf("hello\n");
           strcat(path,"/");
           strcat(path,currEntry->d_name);
+          printf("%s\n",currEntry->d_name);
           checkDirectory(newFile, path);
           return;
         }
@@ -266,8 +257,8 @@ void checkDirectory(int newFile, char * path){
           fprintf(stderr,"ERROR: Input is not a file or a directoy.\n");
           exit(1);
         }
+         closedir(directory);
       }
-    closedir(directory);
 }
 
 
@@ -286,8 +277,9 @@ int main(int argc, char** argv){
   }
   else if(isDirectory(argv[2])){
     char path[260];
-    //strcat(path,".");
+    strcat(path,"./");
     strcat(path,argv[2]);
+    //strcat(path,"/");
     //printf("path %s\n",path);
     checkDirectory(newFile, path);
 
