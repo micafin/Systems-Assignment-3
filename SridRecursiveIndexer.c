@@ -49,6 +49,9 @@ Node * createNode(char * token){
     Node * newNode=(Node*)malloc(sizeof(Node));
     newNode->word=(char*)malloc(strlen(token));
     newNode->word=token;
+    newNode->fileNext = (File*)malloc(sizeof(File*));
+    newNode->fileNext = NULL;
+    newNode->next = (Node*) malloc(sizeof(Node*));
     return newNode;
 }
 
@@ -101,11 +104,12 @@ void sortFile(char * fileName, int index){
 }
 
 void sortWord(char * token, char * fileName, int index){
-    
-    if(file[index]==NULL){
+    printf("entered burh \n");
+    if(!file[index]){
         file[index]=createNode(token);
         return;
     }
+    printf("passed\n");
     Node* prev = (Node*)malloc(sizeof(Node));
     prev = NULL;
     Node* curr = (Node*)malloc(sizeof(Node)); //curr = current node in the LL
@@ -182,6 +186,12 @@ void createToken(char * input, int newFile, char * fileName){
             iterator = 0;
         }else{
             token[iterator] = curr[0];
+            printf("%s\n",token);
+            if(iterator==filesz-2){
+                token[iterator+1]= '\0';
+            }else if(iterator == filesz-1){
+                break;
+            }
             iterator++;
             //printf("%s\n",token);
         }
@@ -195,6 +205,7 @@ void createToken(char * input, int newFile, char * fileName){
         iterator = 0;
 
     }
+    free(token);
 }
 
 void checkDirectory(int newFile, char * path){
