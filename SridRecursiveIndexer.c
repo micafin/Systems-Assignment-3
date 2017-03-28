@@ -145,10 +145,23 @@ void sortWord(char * token, char * fileName, int index){
         }
     }
 }
+int filesize(const char *filename) {
+    struct stat st;
+    
+    if (stat(filename, &st) == 0)
+        return (int)(st.st_size);
+    
+    return -1;
+}
 
 void createToken(char * input, int newFile, char * fileName){
     //char *token=(char*)malloc(sizeof(char));
-    char * token = (char*)malloc(sizeof(char)*256);
+    int filesz = filesize(fileName);
+    if(filesz == -1){
+        printf("This is not a file.  Sorry\n");
+        return;
+    }
+    char * token = (char*)malloc(sizeof(char)*filesz);
     token[0] = '\0';
     char curr[1]= "";
     int fd=open(input, O_RDONLY);
@@ -232,6 +245,13 @@ int main(int argc, char** argv){
     else{
         fprintf(stderr,"ERROR: Input is not a file or directory.\n");
         return -1;
+    }
+    int i;
+    for(i = 0; i<26; i++){
+        if(file[i]){
+          printf("%s\n", file[i]->word);
+        }
+        
     }
     return 0;
 }
