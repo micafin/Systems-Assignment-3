@@ -74,7 +74,7 @@ void sortFile(Node * pointer, char * fileName, int index){
         if(comp>0){
             prev=curr;
             curr=curr->next;
-            if(curr->word == NULL){ // checks to see if end of the LL is reached
+            if(curr->file == NULL){ // checks to see if end of the LL is reached
                 File * newNode=createFile(fileName);
                 newNode->next = curr;
                 prev->next = newNode;
@@ -86,7 +86,7 @@ void sortFile(Node * pointer, char * fileName, int index){
             return;
         }else{
             
-            if(prev->word==NULL){// if prev ==NULL, then we are at head of the list
+            if(prev->file==NULL){// if prev ==NULL, then we are at head of the list
                 File * newNode=createFile(fileName);
                 newNode->next=curr;
                 pointer->fileNext=newNode;
@@ -138,7 +138,7 @@ Node * sortWord(char * token, char * fileName, int index){
             // }
         }else{
             
-            if(prev->==NULL){// if prev ==NULL, then we are at head of the list
+            if(prev->word==NULL){// if prev ==NULL, then we are at head of the list
                 newNode->next=curr;
                 head_of_list=newNode;
                 return newNode;
@@ -219,7 +219,7 @@ void createToken(char * input, int newFile, char * fileName){
             int index=token[0]-'a';
             
             Node * curr=sortWord(token,fileName,index);
-            //sortFile(curr,fileName,index);
+            sortFile(curr,fileName,index);
             token = memset(token, 0, strlen(token));
             iterator = 0;
         }else{
