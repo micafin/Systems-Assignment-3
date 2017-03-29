@@ -113,7 +113,6 @@ Node * sortWord(char * token, char * fileName, int index){
     Node* curr = (Node*)malloc(sizeof(Node)); //curr = current node in the LL
     
     //curr intiialized to the head_of_list
-    
     curr = file[index];
     
     //entering while loop to traverse the existing LL
@@ -147,78 +146,145 @@ Node * sortWord(char * token, char * fileName, int index){
             }
         }
     }
+    return NULL;
 }
 
-void createToken(char * input, int newFile, char * fileName){
-    //char *token=(char*)malloc(sizeof(char));
-   FILE* file = fopen(fileName, "r");;
-    fseek(file,0,SEEK_END);
-    long filesz = ftell(file);
-    fseek(file,0,SEEK_SET);
+// void createToken(char * input, int newFile, char * fileName){
 
-    char * token = (char*)malloc(sizeof(char)*filesz);
-    token[0] = '\0';
-    char curr[1]= "";
-    int fd=open(input, O_RDONLY);
-    int iterator = 0;
-   // printf("hello\n");
-    while(read(fd,curr,1)!=0){
-        if(isdigit(curr[0])&&iterator == 0){
-            continue;
-        }
-        if(!isalnum(curr[0])){
-            if(iterator == 0){
-                continue;
-            }
-            int index=token[0]-'a';
-           // printf("%s\n",token);
-            Node * curr=sortWord(token,fileName,index);
-            sortFile(curr,fileName,index);
-            token = memset(token, 0, strlen(token));
-            iterator = 0;
-        }else{
-            token[iterator] = tolower(curr[0]);
-            iterator++;
-            //printf("%s\n",token);
-        }
-    }
-    if(iterator!=0){
-        int index=token[0]-'a';
-        printf("%s\n",token);
-        sortWord(token,fileName,index);
-        sortFile(fileName,index);
-        token = memset(token, 0, strlen(token));
-        iterator = 0;
-        
-    }
+//      char *token=(char*)malloc(sizeof(char)*2);
+//      char storeChar[2]="";
+//      int fd=open(input, O_RDONLY);
+//      while(read(fd,storeChar,1)!=0){
+//          if(isdigit(storeChar[0])){
+//              if(token==NULL){
+//                  continue;
+//              }
+//          }
+//          if(!isalnum(storeChar[0])){
+
+//              if(token==NULL){
+//                  continue;
+//              }
+             
+//              token[strlen(token)]='\0';
+//             toLowerCase(token);
+//              int index=token[0]-'a';
+//              Node * curr=sortWord(token,fileName,index);
+//              sortFile(curr,fileName,index);
+//              token=NULL;
+//          }
+//          strcat(token,storeChar);
+//          char * temp=(char*)realloc(token,sizeof(char)*strlen(token)+sizeof(char));
+         
+//          token=temp;
+
+//      }
+//  }
+
+ 
+void createToken(char * input, int newFile, char * fileName){
+    
+    FILE*file = fopen(fileName, "r");
+    printf("dis da input: %s\n", input);
+    //printf("entered\n");
+    fseek(file,0,SEEK_END);
+    long filesz = ftell(file);
+    fseek(file,0,SEEK_SET);
+    
+    fclose(file);
+    int fd=open(input, O_RDONLY);
+    char * token = (char*)malloc(filesz);
+    int bytesz = (int) filesz;
+    
+    //fclose(file);
+    token[0] = '\0';
+    char curr[1]= "";
+    //int fd=open(input, O_RDONLY);
+    int iterator = 0;
+  
+    while(read(fd,curr,1)!=0){
+        printf("%d\n", iterator);
+        printf("%s\n", curr);
+        printf("entered\n");
+        if(isdigit(curr[0])&&iterator == 0){
+            iterator++;
+            continue;
+        }
+        if(!isalnum(curr[0])){
+            if(iterator == 0){
+                iterator++;
+                continue;
+            }
+            //int index=token[0]-'a';
+            printf("%s\n",token);
+            //sortWord(token,fileName,index);
+            //sortFile(fileName,index);
+            token = memset(token, 0, strlen(token));
+            iterator = 0;
+        }else{
+            printf("letter\n");
+            token[iterator] = curr[0];
+            printf("%s\n",token);
+            if(iterator==bytesz-2){
+                token[iterator+1]= '\0';
+            }else if(iterator == bytesz-1){
+                break;
+            }
+            iterator++;
+            //printf("%s\n",token);
+        }
+    }
+    if(iterator!=0){
+        int index=token[0]-'a';
+        printf("%s\n",token);
+        sortWord(token,fileName,index);
+        sortFile(fileName,index);
+        token = memset(token, 0, strlen(token));
+        iterator = 0;
+
+    }
+    free(token);
+    return;
 }
 
 void checkDirectory(int newFile, char * path){
     DIR * directory=opendir(path);
-    struct dirent * currEntry;
-    char * temp=malloc(sizeof(char)*256);//NEED TO MALLOC
+    struct dirent * currEntry=readdir(directory);
+    //NEED TO MALLOC
     while((currEntry=readdir(directory))!=NULL){
+
+       printf("IN THIS %s\n",currEntry->d_name);
+       //printf("path %s\n",path);
         if(strcmp(currEntry->d_name,".DS_Store")==0|| strcmp(currEntry->d_name,".")==0 || strcmp(currEntry->d_name,"..")==0){
             continue;
         }
         if(currEntry->d_type==DT_REG){
-            printf("hello\n");
-            printf("%s\n",currEntry->d_name);
+            char * temp=malloc(sizeof(char)*256);
+            strcpy(temp,path);
+            strcat(temp,"/");
             strcat(temp,currEntry->d_name);
-            createToken(path,newFile,temp);
+            //createToken(path,newFile,currEntry->d_name;
+            free(temp);
         }
         else if(currEntry->d_type==DT_DIR){
-            strcat(path,"/");
-            strcat(path,currEntry->d_name);
-            printf("%s\n",currEntry->d_name);
-            checkDirectory(newFile, path);
+            char * temp2=malloc(sizeof(char)*256);
+            strcpy(temp2,path);
+            strcat(temp2,"/");
+            strcat(temp2,currEntry->d_name);
+            //printf("directory: %s\n",path);
+            
+            checkDirectory(newFile, temp2);
+            free(temp2);
+
         }
         else{
             fprintf(stderr,"ERROR: Input is not a file or a directoy.\n");
             exit(1);
-        }
-        closedir(directory);
+        } 
     }
+
+    closedir(directory);
+    return;
 
 }
 
@@ -233,7 +299,8 @@ int main(int argc, char** argv){
     
     if(isFile(argv[2])){
         //open file 
-        createToken(argv[2], newFile, argv[2]);
+      createToken(argv[2], newFile, argv[2]);
+        //createToken(argv[2], newFile, argv[2]);
     }
     else if(isDirectory(argv[2])){
         char path[260];
