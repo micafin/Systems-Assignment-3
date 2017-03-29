@@ -250,6 +250,9 @@ void createToken(char * input, int newFile, char * fileName){
 void checkDirectory(int newFile, char * path){
     DIR * directory=opendir(path);
     struct dirent * currEntry=readdir(directory);
+    if(directory==NULL){
+      return;
+    }
     //NEED TO MALLOC
     while((currEntry=readdir(directory))!=NULL){
 
@@ -286,6 +289,33 @@ void checkDirectory(int newFile, char * path){
     closedir(directory);
     return;
 
+}
+void printList(char* name){
+    printf("entered\n");
+    FILE * outputFile = fopen(name, "a");
+    fprintf(outputFile, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+    fprintf(outputFile, "<fileIndex>\n");
+    int i;
+    
+    for(i = 0; i<26; i++){
+        Node * ptr = (Node*)malloc(sizeof(Node));
+        ptr = file[i];
+        while(ptr){
+            fprintf(outputFile, "\t<word text = \"%s\">\n", ptr->word);
+            File* filetrav = (File*)malloc(sizeof(File));
+            filetrav = ptr->fileNext;
+            if(filetrav){
+                while(filetrav){
+                    fprintf(outputFile, "\t\t<file name=\"%s\">%d</file>\n", filetrav->file, filetrav->occurrences);
+                    filetrav = filetrav->next;
+                }
+            }
+            fprintf(outputFile, "\t</word>\n");
+            ptr = ptr->next;
+        }
+    }
+    fprintf(outputFile, "</fileIndex>");
+    return;
 }
 
 int main(int argc, char** argv){
