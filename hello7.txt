@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fileIndex>
+	<word text = "mica">
+		<file name="file1.txt">2</file>
+		<file name="adfas.txt">1</file>
+	</word>
+</fileIndex><?xml version="1.0" encoding="UTF-8"?>
+<fileIndex>
+	<word text = "mica">
+		<file name="adfas.txt">2</file>
+		<file name="file1.txt">2</file>
+	</word>
+</fileIndex>
