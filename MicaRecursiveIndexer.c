@@ -304,7 +304,7 @@ void createToken(char * input, char * fileName){
             if(curr==NULL){
               fprintf(stderr,"ERROR: Node is null.\n");
             }
-            //sortFile(curr,fileName,index);
+            //sortFileNum(curr,fileName,index);
             //printf("hello\n");
             token = memset(token, 0, strlen(token));
             iterator = 0;
@@ -320,7 +320,7 @@ void createToken(char * input, char * fileName){
     }
     if(iterator!=0){
         Node * curr=sortWord(token);
-        sortFile(curr,fileName,index);
+        sortFileNum(curr,fileName);
         token = memset(token, 0, strlen(token));
         iterator = 0;
     }
