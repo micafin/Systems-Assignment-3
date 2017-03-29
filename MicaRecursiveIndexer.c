@@ -22,7 +22,7 @@ typedef struct _Node{
     
 }Node;
 
-static Node * file[26];
+Node* head_of_list= NULL;
 
 int isFile(char * input){
     struct stat path_stat;
@@ -40,7 +40,7 @@ int isDirectory(char * input){
 File * createFile(char * fileName){
     File * newNode=(File*)malloc(sizeof(File));
     newNode->file=(char*)malloc(strlen(fileName));
-    newNode->file=fileName;
+    strcpy(newNode->file,fileName);
     newNode->next=(File*)malloc(sizeof(File));
     newNode->next=NULL;
     newNode->occurrences=1;
@@ -50,7 +50,7 @@ File * createFile(char * fileName){
 Node * createNode(char * token){
     Node * newNode=(Node*)malloc(sizeof(Node));
     newNode->word=(char*)malloc(strlen(token));
-    newNode->word=token;
+    strcpy(newNode->word,token);
     newNode->fileNext = (File*)malloc(sizeof(File));
     newNode->fileNext = NULL;
     newNode->next = (Node*) malloc(sizeof(Node));
@@ -74,7 +74,7 @@ void sortFile(Node * pointer, char * fileName, int index){
         if(comp>0){
             prev=curr;
             curr=curr->next;
-            if(curr == NULL){ // checks to see if end of the LL is reached
+            if(curr->word == NULL){ // checks to see if end of the LL is reached
                 File * newNode=createFile(fileName);
                 newNode->next = curr;
                 prev->next = newNode;
@@ -86,7 +86,7 @@ void sortFile(Node * pointer, char * fileName, int index){
             return;
         }else{
             
-            if(prev==NULL){// if prev ==NULL, then we are at head of the list
+            if(prev->word==NULL){// if prev ==NULL, then we are at head of the list
                 File * newNode=createFile(fileName);
                 newNode->next=curr;
                 pointer->fileNext=newNode;
@@ -103,18 +103,20 @@ void sortFile(Node * pointer, char * fileName, int index){
 }
 
 Node * sortWord(char * token, char * fileName, int index){
+   
+   //printf("token: %s\n",token);
     
-    if(file[index]==NULL){
-        file[index]=createNode(token);
-        return file[index];
-    }
     Node* prev = (Node*)malloc(sizeof(Node));
     prev = NULL;
     Node* curr = (Node*)malloc(sizeof(Node)); //curr = current node in the LL
     
     //curr intiialized to the head_of_list
-    curr = file[index];
-    
+    curr = head_of_list;
+    if(head_of_list==NULL){
+        head_of_list=createNode(token);
+        return head_of_list;
+    }
+    //printf("head %s\n",head_of_list->word);
     //entering while loop to traverse the existing LL
     while(curr!=NULL){
         int comp=strcmp(token,curr->word);
@@ -122,21 +124,23 @@ Node * sortWord(char * token, char * fileName, int index){
         if(comp>0){
             prev=curr;
             curr=curr->next;
-            
-            if(curr == NULL){ // checks to see if end of the LL is reached
+            //printf("token: %s\n",token);
+           
+            if(curr->word == NULL){ // checks to see if end of the LL is reached
                 newNode->next = curr;
                 prev->next = newNode;
                 return newNode;
             }
+            
         }
         else if(comp==0){
             return newNode;
             // }
         }else{
             
-            if(prev==NULL){// if prev ==NULL, then we are at head of the list
+            if(prev->==NULL){// if prev ==NULL, then we are at head of the list
                 newNode->next=curr;
-                file[index]=newNode;
+                head_of_list=newNode;
                 return newNode;
             }
             else{
@@ -180,7 +184,6 @@ Node * sortWord(char * token, char * fileName, int index){
 
 //      }
 //  }
-
  
 void createToken(char * input, int newFile, char * fileName){
     
@@ -205,7 +208,6 @@ void createToken(char * input, int newFile, char * fileName){
     while(read(fd,curr,1)!=0){
 //        printf("%d\n", iterator);
 //        printf("%c\n", curr[0]);
-//        
         if(isdigit(curr[0])&&iterator == 0){
             iterator++;
             continue;
@@ -215,15 +217,15 @@ void createToken(char * input, int newFile, char * fileName){
                 continue;
             }
             int index=token[0]-'a';
-            printf("%s\n",token);
+            
             Node * curr=sortWord(token,fileName,index);
-            sortFile(curr,fileName,index);
+            //sortFile(curr,fileName,index);
             token = memset(token, 0, strlen(token));
             iterator = 0;
         }else{
             //printf("letter\n");
+          
             token[iterator] = curr[0];
-            //printf("%s\n",token);
             if(iterator==bytesz-2){
                 token[iterator+1]= '\0';
             }else if(iterator == bytesz-1){
@@ -235,14 +237,16 @@ void createToken(char * input, int newFile, char * fileName){
     }
     if(iterator!=0){
         int index=token[0]-'a';
-        printf("%s\n",token);
         Node * curr=sortWord(token,fileName,index);
         sortFile(curr,fileName,index);
         token = memset(token, 0, strlen(token));
         iterator = 0;
-
     }
-    
+       Node * start=head_of_list;
+                while(start->word!=NULL){
+                  printf("%s\n",start->word);
+                  start=start->next;
+                }
     free(token);
     return;
 }
@@ -290,16 +294,14 @@ void checkDirectory(int newFile, char * path){
     return;
 
 }
+
 void printList(char* name){
     printf("entered\n");
     FILE * outputFile = fopen(name, "a");
     fprintf(outputFile, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
     fprintf(outputFile, "<fileIndex>\n");
-    int i;
-    
-    for(i = 0; i<26; i++){
         Node * ptr = (Node*)malloc(sizeof(Node));
-        ptr = file[i];
+        ptr = head_of_list;
         while(ptr){
             fprintf(outputFile, "\t<word text = \"%s\">\n", ptr->word);
             File* filetrav = (File*)malloc(sizeof(File));
@@ -313,7 +315,6 @@ void printList(char* name){
             fprintf(outputFile, "\t</word>\n");
             ptr = ptr->next;
         }
-    }
     fprintf(outputFile, "</fileIndex>");
     return;
 }
