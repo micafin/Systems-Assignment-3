@@ -86,7 +86,7 @@ void sortFile(Node * pointer, char * fileName, int index){
             return;
         }else{
             
-            if(prev->file==NULL){// if prev ==NULL, then we are at head of the list
+            if(prev==NULL){// if prev ==NULL, then we are at head of the list
                 File * newNode=createFile(fileName);
                 newNode->next=curr;
                 pointer->fileNext=newNode;
@@ -137,8 +137,8 @@ Node * sortWord(char * token, char * fileName, int index){
             return newNode;
             // }
         }else{
-            
-            if(prev->word==NULL){// if prev ==NULL, then we are at head of the list
+            //printf("token %s\n",head_of_list->word);
+            if(prev==NULL){// if prev ==NULL, then we are at head of the list
                 newNode->next=curr;
                 head_of_list=newNode;
                 return newNode;
@@ -206,8 +206,6 @@ void createToken(char * input, int newFile, char * fileName){
     int iterator = 0;
   
     while(read(fd,curr,1)!=0){
-//        printf("%d\n", iterator);
-//        printf("%c\n", curr[0]);
         if(isdigit(curr[0])&&iterator == 0){
             iterator++;
             continue;
@@ -217,14 +215,12 @@ void createToken(char * input, int newFile, char * fileName){
                 continue;
             }
             int index=token[0]-'a';
-            
             Node * curr=sortWord(token,fileName,index);
-            sortFile(curr,fileName,index);
+            //sortFile(curr,fileName,index);
+            //printf("hello\n");
             token = memset(token, 0, strlen(token));
             iterator = 0;
         }else{
-            //printf("letter\n");
-          
             token[iterator] = curr[0];
             if(iterator==bytesz-2){
                 token[iterator+1]= '\0';
@@ -232,7 +228,6 @@ void createToken(char * input, int newFile, char * fileName){
                 break;
             }
             iterator++;
-            //printf("%s\n",token);
         }
     }
     if(iterator!=0){
