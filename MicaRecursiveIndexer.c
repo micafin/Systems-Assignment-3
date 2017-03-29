@@ -57,6 +57,35 @@ Node * createNode(char * token){
     return newNode;
 }
 
+int newStrCmp (const char *s1, const char *s2) {
+    const unsigned char *p1 = (const unsigned char *)s1;
+    const unsigned char *p2 = (const unsigned char *)s2;
+
+    while (*p1 != '\0') {
+        if(*p1>=48&&*p1<=57){
+            if(isalpha(*p2)){
+                return 1;
+            }
+        }
+        if(*p2>=48&&*p2<=57){
+            if(isalpha(*p1)){
+                return -1;
+            }
+        }
+
+        if (*p2 == '\0') return  1;
+        if (*p2 > *p1)   return -1;
+        if (*p1 > *p2)   return  1;
+
+        p1++;
+        p2++;
+    }
+
+    if (*p2 != '\0') return -1;
+
+    return 0;
+}
+
 void sortFile(Node * pointer, char * fileName, int index){
     
     if(pointer->fileNext==NULL){
@@ -70,7 +99,7 @@ void sortFile(Node * pointer, char * fileName, int index){
     curr = pointer->fileNext;
     while(curr!=NULL){
         
-        int comp=strcmp(fileName,curr->file);
+        int comp=newStrCmp(fileName,curr->file);
         if(comp>0){
             prev=curr;
             curr=curr->next;
@@ -119,19 +148,27 @@ Node * sortWord(char * token, char * fileName, int index){
     //printf("head %s\n",head_of_list->word);
     //entering while loop to traverse the existing LL
     while(curr!=NULL){
-        int comp=strcmp(token,curr->word);
+        int comp=newStrCmp(token,curr->word);
         Node * newNode=createNode(token);
+        printf("curr word: %s  token: %s\n",curr->word,token);
         if(comp>0){
+
             prev=curr;
             curr=curr->next;
-            //printf("token: %s\n",token);
-           
-            if(curr->word == NULL){ // checks to see if end of the LL is reached
+            printf("prev word next %s\n",prev->word);
+            if(curr!=NULL){
+
+              if(curr->word){
+                 printf("curr word inside: %s\n",curr->word);
+              }
+            }
+          
+           printf("in here\n");
+            if(prev->next== NULL){ // checks to see if end of the LL is reached
                 newNode->next = curr;
                 prev->next = newNode;
                 return newNode;
             }
-            
         }
         else if(comp==0){
             return newNode;
@@ -215,7 +252,11 @@ void createToken(char * input, int newFile, char * fileName){
                 continue;
             }
             int index=token[0]-'a';
+            printf("token %s\n",token);
             Node * curr=sortWord(token,fileName,index);
+            if(curr==NULL){
+              fprintf(stderr,"ERROR: Node is null.\n");
+            }
             //sortFile(curr,fileName,index);
             //printf("hello\n");
             token = memset(token, 0, strlen(token));
@@ -257,7 +298,7 @@ void checkDirectory(int newFile, char * path){
 
        printf("IN THIS %s\n",currEntry->d_name);
        //printf("path %s\n",path);
-        if(strcmp(currEntry->d_name,".DS_Store")==0|| strcmp(currEntry->d_name,".")==0 || strcmp(currEntry->d_name,"..")==0){
+        if(newStrCmp(currEntry->d_name,".DS_Store")==0|| newStrCmp(currEntry->d_name,".")==0 || newStrCmp(currEntry->d_name,"..")==0){
             continue;
         }
         if(currEntry->d_type==DT_REG){
